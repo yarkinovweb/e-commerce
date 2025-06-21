@@ -4,7 +4,7 @@ let filteredProducts = []
 let currentUser = null
 let isLoggedIn = false
 
-const API_BASE_URL = "http://localhost:3000/api"
+const API_BASE_URL = "https://e-commerce-c5fu.onrender.com/api"
 
 const productsGrid = document.getElementById("productsGrid")
 const loadingSpinner = document.getElementById("loadingSpinner")
