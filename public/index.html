@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ShopEasy</title>
+    <link rel="stylesheet" href="styles/main.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <header class="header">
+      <div class="container">
+        <div class="logo">
+          <h1>ShopEasy</h1>
+        </div>
+        <nav class="nav">
+          <ul>
+            <li><a href="#home">Bosh sahifa</a></li>
+            <li><a href="#products">Mahsulotlar</a></li>
+            <li><a href="#faq">FAQ</a></li>
+            <li><a href="#support">Qo'llash</a></li>
+          </ul>
+        </nav>
+        <div class="header-actions">
+          <div class="search-container">
+            <input
+              type="text"
+              id="searchInput"
+              placeholder="Mahsulot qidirish..."
+            />
+            <button id="searchBtn"><i class="fas fa-search"></i></button>
+          </div>
+          <div class="cart-container">
+            <button id="cartBtn" class="cart-btn">
+              <i class="fas fa-shopping-cart"></i>
+              <span id="cartCount" class="cart-count">0</span>
+            </button>
+          </div>
+          <div class="user-actions">
+            <button id="loginBtn" class="btn-secondary">Kirish</button>
+            <button id="registerBtn" class="btn-secondary">
+              Ro'yhatdan o'tish
+            </button>
+            <button id="logoutBtn" class="btn-secondary" style="display: none">
+              Chiqish
+            </button>
+            <button id="trackOrderBtn" class="btn-secondary">
+              Buyurtma holati
+            </button>
+            <span
+              id="userWelcome"
+              class="user-welcome"
+              style="display: none"
+            ></span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section id="home" class="hero">
+        <div class="container">
+          <h2>ShopEasy ga xush kelibsiz !</h2>
+          <p>Ajoyib mahsulotlarni yuqori narxlarda kashf eting</p>
+          <button class="btn-primary" onclick="scrollToProducts()">
+            Hoziroq harid qiling
+          </button>
+        </div>
+      </section>
+
+      <section id="products" class="products-section">
+        <div class="container">
+          <div class="section-header">
+            <h2>Bizning mahsulotlarimiz</h2>
+            <div class="filters">
+              <select id="categoryFilter">
+                <option value="">Hamma kategoriyalar</option>
+                <option value="electronics">Elektronika</option>
+                <option value="clothing">Kiyim-kechak</option>
+                <option value="books">Kitoblar</option>
+                <option value="home">Uy & hovli</option>
+              </select>
+              <select id="sortFilter">
+                <option value="name">Nom bo'yicha tartiblash</option>
+                <option value="price-low">Narx: arzondan qimmatga</option>
+                <option value="price-high">Narx: qimmatdan arzonga</option>
+                <option value="rating">reyting</option>
+              </select>
+            </div>
+          </div>
+          <div id="productsGrid" class="products-grid">
+          </div>
+          <div id="loadingSpinner" class="loading">
+            Mahsulotlar kutilmoqda...
+          </div>
+        </div>
+      </section>
+
+      <section id="faq" class="faq-section">
+        <div class="container">
+          <h2>Ko'p so'raladigan savollar</h2>
+          <div class="faq-list">
+            <div class="faq-item">
+              <div class="faq-question">
+                Qanday qilib buyurtma qilsam bo'ladi?
+              </div>
+              <div class="faq-answer">
+                Shunchaki mahsulotlarimizni ko'rib chiqing, savatga narsalarni
+                qo'shing va rasmiylashtiring.
+              </div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-question">Qanday usulda to'lov qilinadi?</div>
+              <div class="faq-answer">
+                Biz kredit kartalari, debet kartalari va yetkazib berishda naqd
+                pulni qabul qilamiz.
+              </div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-question">
+                Buyurtmani qanday kuzatishim mumkin?
+              </div>
+              <div class="faq-answer">
+                Buyurtma identifikatori bilan sarlavhadagi "Buyurtma holati"
+                tugmasidan foydalaning.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="support" class="support-section">
+        <div class="container">
+          <h2>Texnik qo'llab-quvvatlash</h2>
+          <div class="support-content">
+            <div class="support-info">
+              <h3>Biz bilan bog'laning</h3>
+              <p><i class="fas fa-phone"></i> +998 (94) 123 45 67</p>
+              <p><i class="fas fa-envelope"></i> support@shopeasy.com</p>
+              <p><i class="fas fa-clock"></i> Dushanba-Juma: 9:00-18:00</p>
+            </div>
+            <form id="supportForm" class="support-form">
+              <h3>Bizga xabar yuboring</h3>
+              <input type="text" placeholder="Ismingiz" required />
+              <input type="email" placeholder="Pochtangiz" required />
+              <textarea placeholder="Xabaringiz" required></textarea>
+              <button type="submit" class="btn-primary">
+                Xabarni jo'natish
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div id="cartModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Xarid savati</h3>
+          <span class="close">&times;</span>
+        </div>
+        <div id="cartItems" class="cart-items">
+        </div>
+        <div class="cart-footer">
+          <div class="cart-total">
+            <strong>Umumiy: $<span id="cartTotal">0.00</span></strong>
+          </div>
+          <button id="checkoutBtn" class="btn-primary">Rasmiylashtirish</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="checkoutModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Rasmiylashtirish</h3>
+          <span class="close">&times;</span>
+        </div>
+        <form id="checkoutForm" class="checkout-form">
+          <div class="form-section">
+            <h4>Rasmiylashtirish ma'lumotlari</h4>
+            <input
+              type="text"
+              name="fullName"
+              placeholder="Ism, familiya"
+              required
+            />
+            <input type="text" name="address" placeholder="Manzil" required />
+            <input
+              type="text"
+              name="city"
+              placeholder="Shahar/Tuman"
+              required
+            />
+            <input
+              type="text"
+              name="zipCode"
+              placeholder="Uy raqami"
+              required
+            />
+            <input
+              type="tel"
+              name="phone"
+              placeholder="Telefon raqam"
+              required
+            />
+          </div>
+          <div class="form-section">
+            <h4>To'lov turi</h4>
+            <label>
+              <input type="radio" name="paymentMethod" value="card" checked />
+              Karta orqali
+            </label>
+            <label>
+              <input type="radio" name="paymentMethod" value="cod" />
+              Naqd pul yetqazib berish
+            </label>
+          </div>
+          <div id="cardDetails" class="form-section">
+            <input type="text" name="cardNumber" placeholder="Karta raqam" />
+            <input type="text" name="expiryDate" placeholder="OO/YY" />
+            <input type="text" name="cvv" placeholder="CVV" />
+          </div>
+          <button type="submit" class="btn-primary">Rasmiylashtirish</button>
+        </form>
+      </div>
+    </div>
+
+    <div id="trackingModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Buyurtma holatini ko'rish</h3>
+          <span class="close">&times;</span>
+        </div>
+        <div class="tracking-form">
+          <input
+            type="text"
+            id="orderIdInput"
+            placeholder="Buyurtma raqamini kiriting"
+          />
+          <button id="trackBtn" class="btn-primary">Ko'rish</button>
+        </div>
+        <div id="trackingResult" class="tracking-result">
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <div class="container">
+        <p>&copy; 2025 ShopEasy. Barcha huquqlar himoyalangan.</p>
+      </div>
+    </footer>
+
+    <div id="loginModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Kirish</h3>
+          <span class="close">&times;</span>
+        </div>
+        <form id="loginForm" class="auth-form">
+          <div class="form-group">
+            <label for="loginEmail">Pochta</label>
+            <input type="email" id="loginEmail" required />
+          </div>
+          <div class="form-group">
+            <label for="loginPassword">Parol</label>
+            <input type="password" id="loginPassword" required />
+          </div>
+          <div class="form-group">
+            <label>
+              <input type="checkbox" id="isAdmin" /> Admin bo'lib kirish
+            </label>
+          </div>
+          <button type="submit" class="btn-primary">Kirish</button>
+          <p class="auth-switch">
+            Akkountingiz yo'qmi?
+            <a href="#" onclick="switchToRegister()">Ro'yhatdan o'ting</a>
+          </p>
+        </form>
+      </div>
+    </div>
+
+    <div id="registerModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Akkount yaratish</h3>
+          <span class="close">&times;</span>
+        </div>
+        <form id="registerForm" class="auth-form">
+          <div class="form-group">
+            <label for="registerName">Ism, Familiya</label>
+            <input type="text" id="registerName" required />
+          </div>
+          <div class="form-group">
+            <label for="registerEmail">Pochta</label>
+            <input type="email" id="registerEmail" required />
+          </div>
+          <div class="form-group">
+            <label for="registerPhone">Telefon raqam</label>
+            <input type="tel" id="registerPhone" required />
+          </div>
+          <div class="form-group">
+            <label for="registerPassword">Parol</label>
+            <input
+              type="password"
+              id="registerPassword"
+              required
+              minlength="6"
+            />
+          </div>
+          <div class="form-group">
+            <label for="confirmPassword">Parolni tasdiqlang</label>
+            <input type="password" id="confirmPassword" required />
+          </div>
+          <button type="submit" class="btn-primary">Akkount yaratish</button>
+          <p class="auth-switch">
+            Hisobingiz bormi?
+            <a href="#" onclick="switchToLogin()">Kirish</a>
+          </p>
+        </form>
+      </div>
+    </div>
+
+    <script src="js/main.js"></script>
+  </body>
+</html>
