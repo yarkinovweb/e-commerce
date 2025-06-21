@@ -4,7 +4,7 @@ let filteredProducts = []
 let currentUser = null
 let isLoggedIn = false
 
-const API_BASE_URL = "https://e-commerce-c5fu.onrender.com/api"
+const API_BASE_URL = "https://e-commerce-c5fu.onrender.com/api";
 
 const productsGrid = document.getElementById("productsGrid")
 const loadingSpinner = document.getElementById("loadingSpinner")
@@ -113,7 +113,7 @@ async function handleRegister(e) {
   const confirmPassword = document.getElementById("confirmPassword").value
 
   if (password !== confirmPassword) {
-    showNotification("Passwords do not match!", "error")
+    showNotification("Parollar mos kelmadi!", "error")
     return
   }
 
@@ -180,8 +180,10 @@ async function handleLogin(e) {
       localStorage.setItem("currentUser", JSON.stringify(currentUser))
       localStorage.setItem("authToken", result.token)
 
+      console.log("Login successful, token saved:", result.token)
+
       if (result.user.isAdmin) {
-        showNotification("Administratorga kirish muvaffaqiyatli! Administrator paneliga yoʻnaltirilmoqda...")
+        showNotification("Admin login successful! Redirecting to admin panel...")
         document.getElementById("loginModal").style.display = "none"
         document.getElementById("loginForm").reset()
 
@@ -199,7 +201,7 @@ async function handleLogin(e) {
     }
   } catch (error) {
     console.error("Login error:", error)
-    showNotification("Tizimga kirishda xatolik yuz berdi. Iltimos, qayta urinib koʻring.", "error")
+    showNotification("Tizimga kirishda xatolik yuz berdi. Hisob maʼlumotlaringizni tekshiring.", "error")
   }
 }
 
@@ -209,7 +211,7 @@ function handleLogout() {
   localStorage.removeItem("currentUser")
   localStorage.removeItem("authToken")
   updateAuthUI()
-  showNotification("Hisobdan muvaffaqiyatli chiqdi!")
+  showNotification("Hisobdan muvaffaqiyatli chiqildi!")
 }
 
 function updateAuthUI() {
@@ -236,10 +238,15 @@ function checkAuthStatus() {
   const savedUser = localStorage.getItem("currentUser")
   const authToken = localStorage.getItem("authToken")
 
+  console.log("Checking auth status:", { savedUser, authToken })
+
   if (savedUser && authToken) {
     currentUser = JSON.parse(savedUser)
     isLoggedIn = true
     updateAuthUI()
+    console.log("User is logged in:", currentUser)
+  } else {
+    console.log("User is not logged in")
   }
 }
 
@@ -260,7 +267,7 @@ async function loadProducts() {
     filteredProducts = [...products]
     displayProducts(filteredProducts)
   } catch (error) {
-    console.error("Mahsulotlarni yuklashda xatolik:", error)
+    console.error("Mahsulotlarni yuklashda xatolik yuz berdi:", error)
     productsGrid.innerHTML = "<p>Mahsulotlarni yuklashda xatolik yuz berdi. Keyinroq qayta urinib ko‘ring.</p>"
   } finally {
     loadingSpinner.style.display = "none"
@@ -269,7 +276,7 @@ async function loadProducts() {
 
 function displayProducts(productsToShow) {
   if (productsToShow.length === 0) {
-    productsGrid.innerHTML = "<p>Hech qanday mahsulot topilmadi.</p>"
+    productsGrid.innerHTML = "<p>Mahsulotlar topilmadi</p>"
     return
   }
 
@@ -357,7 +364,7 @@ function addToCart(productId) {
   updateCartUI()
   saveCartToStorage()
 
-  showNotification("Mahsulot savatga qo'shildi!")
+  showNotification("Mahsulot savatda qo'shildi")
 }
 
 function updateCartUI() {
@@ -368,7 +375,7 @@ function updateCartUI() {
 
   const cartItems = document.getElementById("cartItems")
   if (cart.length === 0) {
-    cartItems.innerHTML = "<p>Savatingiz boʻsh</p>"
+    cartItems.innerHTML = "<p>Savat bo'sh</p>"
     return
   }
 
@@ -431,7 +438,7 @@ function openCartModal() {
 
 function openCheckoutModal() {
   if (cart.length === 0) {
-    showNotification("Savatingiz boʻsh!")
+    showNotification("Your cart is empty!")
     return
   }
 
@@ -459,6 +466,19 @@ function toggleCardDetails() {
 async function handleCheckout(e) {
   e.preventDefault()
 
+  console.log("Starting checkout...")
+  console.log("Is logged in:", isLoggedIn)
+  console.log("Current user:", currentUser)
+
+  const authToken = localStorage.getItem("authToken")
+  console.log("Auth token from localStorage:", authToken)
+
+  if (!authToken) {
+    showNotification("Akkount bilan kirish talab qilinadi. Iltimos, qayta urining.", "error")
+    openLoginModal()
+    return
+  }
+
   const formData = new FormData(e.target)
   const orderData = {
     items: cart,
@@ -478,40 +498,147 @@ async function handleCheckout(e) {
     total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
   }
 
+  console.log("Order data:", orderData)
+
   try {
+    console.log("Sending request with token:", authToken)
+
     const response = await fetch(`${API_BASE_URL}/orders`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken}`,
       },
       body: JSON.stringify(orderData),
     })
 
+    console.log("Response status:", response.status)
+    console.log("Response headers:", response.headers)
+
     const result = await response.json()
+    console.log("Response data:", result)
 
     if (response.ok) {
-      showNotification(`Buyurtma muvaffaqiyatli rasmiylashtirildi! Buyurtma raqami: ${result.orderId}`)
+      showNotification(`Buyurtma muvaffaqiyatli rasmiylashtirildi! Buyurtma identifikatori: ${result.orderId}`)
       cart = []
       updateCartUI()
       saveCartToStorage()
       checkoutModal.style.display = "none"
     } else {
-      showNotification("Buyurtma berishda xatolik yuz berdi. Iltimos, qayta urinib koʻring.")
+      console.error("Order failed:", result)
+      if (response.status === 401) {
+        showNotification("Seans muddati tugadi. Iltimos, qayta kiring.", "error")
+        handleLogout()
+        openLoginModal()
+      } else {
+        showNotification(result.error || "Buyurtma berishda xatolik yuz berdi. Iltimos, qayta urinib koʻring.", "error")
+      }
     }
   } catch (error) {
-    console.error("Buyurtmani joylashtirishda xatolik yuz berdi:", error)
-    showNotification("Buyurtma berishda xatolik yuz berdi. Iltimos, qayta urinib koʻring.")
+    console.error("Error placing order:", error)
+    showNotification("Buyurtma berishda xatolik yuz berdi. Iltimos, qayta urinib koʻring.", "error")
   }
 }
 
 function openTrackingModal() {
+  if (!requireAuth()) {
+    return
+  }
+
   trackingModal.style.display = "block"
+  loadUserOrders()
+}
+
+async function loadUserOrders() {
+  try {
+    const authToken = localStorage.getItem("authToken")
+
+    const response = await fetch(`${API_BASE_URL}/my-orders`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+        "Content-Type": "application/json",
+      },
+    })
+
+    if (response.ok) {
+      const orders = await response.json()
+      displayUserOrders(orders)
+    } else {
+      document.getElementById("trackingResult").innerHTML = "<p>Buyurtmalaringizni yuklashda xatolik yuz berdi. Iltimos, qayta urinib koʻring.</p>"
+    }
+  } catch (error) {
+    console.error("Foydalanuvchi buyurtmalarini yuklashda xatolik yuz berdi:", error)
+    document.getElementById("trackingResult").innerHTML = "<p>Buyurtmalaringizni yuklashda xatolik yuz berdi. Iltimos, qayta urinib koʻring.</p>"
+  }
+}
+
+function displayUserOrders(orders) {
+  const trackingResult = document.getElementById("trackingResult")
+
+  if (orders.length === 0) {
+    trackingResult.innerHTML = "<p>Siz hali hech qanday buyurtma bermadingiz.</p>"
+    return
+  }
+
+  trackingResult.innerHTML = `
+    <div class="user-orders">
+      <h3>Your Orders</h3>
+      ${orders
+        .map(
+          (order) => `
+        <div class="order-card">
+          <div class="order-header">
+            <h4>Order #${order.orderId}</h4>
+            <span class="order-status status-${order.status}">${order.status.toUpperCase()}</span>
+          </div>
+          <div class="order-details">
+            <p><strong>Sana:</strong> ${new Date(order.orderDate).toLocaleDateString()}</p>
+            <p><strong>Jami:</strong> $${order.total.toFixed(2)}</p>
+            <p><strong>Soni:</strong> ${order.items.length} item(s)</p>
+          </div>
+          <div class="order-items">
+            ${order.items
+              .map(
+                (item) => `
+              <div class="order-item">
+                <span>${item.name} x${item.quantity}</span>
+                <span>$${(item.price * item.quantity).toFixed(2)}</span>
+              </div>
+            `,
+              )
+              .join("")}
+          </div>
+          <div class="order-timeline">
+            <div class="status-step ${order.status === "pending" ? "current" : "completed"}">
+              <div>📋</div>
+              <div>Buyurtma rasmiylashtirildi</div>
+            </div>
+            <div class="status-step ${order.status === "processing" ? "current" : (order.status === "shipped" || order.status === "delivered") ? "completed" : ""}">
+              <div>⚙️</div>
+              <div>Jarayonda</div>
+            </div>
+            <div class="status-step ${order.status === "shipped" ? "current" : order.status === "delivered" ? "completed" : ""}">
+              <div>🚚</div>
+              <div>Jo'natildi</div>
+            </div>
+            <div class="status-step ${order.status === "delivered" ? "current" : ""}">
+              <div>📦</div>
+              <div>Yetqazildi</div>
+            </div>
+          </div>
+        </div>
+      `,
+        )
+        .join("")}
+    </div>
+  `
 }
 
 async function trackOrder() {
   const orderId = document.getElementById("orderIdInput").value.trim()
   if (!orderId) {
-    showNotification("Please enter an order ID")
+    showNotification("Buyurtma identifikatorini kiriting")
     return
   }
 
@@ -526,7 +653,7 @@ async function trackOrder() {
     }
   } catch (error) {
     console.error("Error tracking order:", error)
-    document.getElementById("trackingResult").innerHTML = "<p>Buyurtmani kuzatishda xatolik yuz berdi. Keyinroq qayta urinib ko‘ring.</p>"
+    document.getElementById("trackingResult").innerHTML = "<p>Buyurtmani ko'rishda xatolik yuz berdi. Keyinroq qayta urinib ko‘ring.</p>"
   }
 }
 
@@ -543,19 +670,19 @@ function displayTrackingResult(orderData) {
             <div class="status-timeline">
                 <div class="status-step ${orderData.status === "pending" ? "current" : "completed"}">
                     <div>📋</div>
-                    <div>Order Placed</div>
+                    <div>Buyurtma rasmiylashtirildi</div>
                 </div>
                 <div class="status-step ${orderData.status === "processing" ? "current" : orderData.status === "shipped" || orderData.status === "delivered" ? "completed" : ""}">
                     <div>⚙️</div>
-                    <div>Processing</div>
+                    <div>Jarayonda</div>
                 </div>
                 <div class="status-step ${orderData.status === "shipped" ? "current" : orderData.status === "delivered" ? "completed" : ""}">
                     <div>🚚</div>
-                    <div>Shipped</div>
+                    <div>Jo'natildi</div>
                 </div>
                 <div class="status-step ${orderData.status === "delivered" ? "current" : ""}">
                     <div>📦</div>
-                    <div>Delivered</div>
+                    <div>Yetqazildi</div>
                 </div>
             </div>
         </div>
@@ -588,8 +715,8 @@ async function handleSupportForm(e) {
       showNotification("Xabar yuborishda xatolik yuz berdi. Iltimos, qayta urinib koʻring.")
     }
   } catch (error) {
-    console.error("Yordam xabarini yuborishda xatolik yuz berdi:", error)
-    showNotification("Xabar yuborishda xatolik yuz berdi. Iltimos, qayta urinib koʻring.")
+    console.error("Error sending support message:", error)
+    showNotification("Error sending message. Please try again.")
   }
 }
 
@@ -618,5 +745,5 @@ function showNotification(message, type = "success") {
 
   setTimeout(() => {
     notification.remove()
-  }, 3000)
+  }, 5000)
 }
