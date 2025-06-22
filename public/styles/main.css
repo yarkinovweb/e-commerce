@@ -54,7 +54,7 @@ body {
   color: #e74c3c;
 }
 
-.navbar{
+.navbar {
   width: 100%;
   display: flex;
   justify-content: space-between;
@@ -645,7 +645,7 @@ main {
 
 @media (max-width: 768px) {
 
-  .navbar{
+  .navbar {
     flex-direction: column;
   }
 
@@ -664,8 +664,25 @@ main {
     width: 150px;
   }
 
+  .hero {
+    margin-top: 170px;
+    padding: 30px 0;
+  }
+
   .hero h2 {
-    font-size: 2rem;
+    font-size: 25px;
+    margin: 0;
+  }
+
+  .hero p {
+    font-size: 15px;
+    margin: 0;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    margin-top: 10px;
+    margin-bottom: 0;
   }
 
   .section-header {
