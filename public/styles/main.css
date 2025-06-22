@@ -34,7 +34,7 @@ body {
 
 .logo h1 {
   color: #e74c3c;
-  font-size: 1.8rem;
+  font-size: 1.7rem;
 }
 
 .nav ul {
@@ -54,9 +54,17 @@ body {
   color: #e74c3c;
 }
 
+.navbar{
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .header-actions {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 1rem;
 }
 
@@ -636,6 +644,11 @@ main {
 }
 
 @media (max-width: 768px) {
+
+  .navbar{
+    flex-direction: column;
+  }
+
   .header .container {
     flex-direction: column;
     gap: 1rem;
@@ -644,6 +657,7 @@ main {
   .header-actions {
     flex-wrap: wrap;
     justify-content: center;
+    margin-bottom: 10px;
   }
 
   .search-container input {
